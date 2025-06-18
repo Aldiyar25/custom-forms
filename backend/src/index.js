@@ -1,0 +1,39 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import authRoutes from "./routes/auth.js";
+import { verifyToken } from "./middlewares/auth.js";
+import templateRoutes from "./routes/templates.js";
+import tagRoutes from "./routes/tags.js";
+import uploadRoutes from "./routes/uploads.js";
+import { isAdmin } from "./middlewares/auth.js";
+import adminRoutes from "./routes/admin.js";
+import formRoutes from "./routes/forms.js";
+import userRoutes from "./routes/users.js";
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use("/api/uploads", uploadRoutes);
+
+app.use("/api/auth", authRoutes);
+app.use("/api/templates", templateRoutes);
+app.use("/api/tags", tagRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/forms", formRoutes);
+app.use("/api/users", userRoutes);
+
+app.get("/api/protected", verifyToken, (req, res) => {
+  res.json({
+    message: "Hi, user " + req.user.id + " with role " + req.user.role,
+  });
+});
+
+app.delete("/api/admin/some-resource", verifyToken, isAdmin, (req, res) => {
+  res.json({ message: "Resource deleted by admin" });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
