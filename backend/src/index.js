@@ -20,12 +20,9 @@ const FRONTEND_URL = "https://custom-forms-5x46.onrender.com";
 app.use(
   cors({
     origin: FRONTEND_URL,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.options("*", cors());
 app.use(express.json());
 app.use("/api/uploads", uploadRoutes);
 
