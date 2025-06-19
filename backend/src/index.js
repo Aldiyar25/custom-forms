@@ -15,7 +15,7 @@ dotenv.config();
 
 const app = express();
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL = "https://custom-forms-5x46.onrender.com";
 
 app.use(
   cors({
