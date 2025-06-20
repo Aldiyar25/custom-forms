@@ -14,10 +14,18 @@ import userRoutes from "./routes/users.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "https://custom-forms-ui.onrender.com";
+
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use("/api/uploads", uploadRoutes);
-
 app.use("/api/auth", authRoutes);
 app.use("/api/templates", templateRoutes);
 app.use("/api/tags", tagRoutes);
