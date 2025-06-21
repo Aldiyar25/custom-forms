@@ -19,7 +19,7 @@ const FRONTEND_URL =
 
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   })
 );
