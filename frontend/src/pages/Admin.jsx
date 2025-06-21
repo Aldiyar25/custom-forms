@@ -1,147 +1,248 @@
 import { useContext, useEffect, useState } from "react";
-import { Container, Table, Button, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Nav,
+  InputGroup,
+  FormControl,
+  Button,
+  Dropdown,
+  Table,
+  Form,
+  Pagination,
+  Spinner,
+} from "react-bootstrap";
 import api from "../api/axios";
 import { AuthContext } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Admin() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchUsers = () => {
-    setLoading(true);
-    api
-      .get("/admin/users")
-      .then(({ data }) => setUsers(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
+  const [selected, setSelected] = useState(new Set());
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const updateUser = (id, changes) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, ...changes } : u))
-    );
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get("/admin/users");
+      setUsers(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleBlock = async (id) => {
-    await api.patch(`/admin/users/${id}/block`);
-    updateUser(id, { isBlocked: true });
+  const toggleSelect = (id) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   };
-
-  const handleUnblock = async (id) => {
-    await api.patch(`/admin/users/${id}/unblock`);
-    updateUser(id, { isBlocked: false });
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this user?")) return;
-    await api.delete(`/admin/users/${id}`);
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-  };
-
-  const handleGrant = async (id) => {
-    await api.patch(`/admin/users/${id}/grant`);
-    updateUser(id, { role: "ADMIN" });
-  };
-
-  const handleRevoke = async (id) => {
-    await api.patch(`/admin/users/${id}/revoke`);
-    if (user.id === id) {
-      logout();
-      navigate("/login", { replace: true });
+  const toggleSelectAll = () => {
+    if (selected.size === users.length) {
+      setSelected(new Set());
     } else {
-      updateUser(id, { role: "USER" });
+      setSelected(new Set(users.map((u) => u.id)));
+    }
+  };
+
+  const bulkAction = async (action) => {
+    // пример вызова api для групповых операций
+    // await api.post(`/admin/users/bulk-${action}`, { ids: [...selected] });
+    console.log("bulk", action, Array.from(selected));
+  };
+
+  const userAction = async (id, act) => {
+    // act: 'block','unblock','grant','revoke','delete'
+    if (act === "delete" && !window.confirm("Delete this user?")) return;
+    const urlMap = {
+      block: `/admin/users/${id}/block`,
+      unblock: `/admin/users/${id}/unblock`,
+      grant: `/admin/users/${id}/grant`,
+      revoke: `/admin/users/${id}/revoke`,
+    };
+    if (act === "delete") {
+      await api.delete(`/admin/users/${id}`);
+      setUsers((us) => us.filter((u) => u.id !== id));
+      setSelected((s) => {
+        const n = new Set(s);
+        n.delete(id);
+        return n;
+      });
+      if (user.id === id) {
+        logout();
+        navigate("/login", { replace: true });
+      }
+    } else {
+      await api.patch(urlMap[act]);
+      setUsers((us) =>
+        us.map((u) =>
+          u.id === id
+            ? {
+                ...u,
+                isBlocked: act === "block",
+                role:
+                  act === "grant"
+                    ? "ADMIN"
+                    : act === "revoke"
+                    ? "USER"
+                    : u.role,
+              }
+            : u
+        )
+      );
     }
   };
 
   if (loading) {
     return (
       <div className="d-flex justify-content-center mt-5">
-        <Spinner />
+        <Spinner animation="border" />
       </div>
     );
   }
 
   return (
-    <Container>
-      <h3 className="mb-3">User Management</h3>
-      <Table striped bordered hover size="sm">
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Joined</th>
-            <th>Blocked</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id}>
-              <td>{u.username}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>{new Date(u.createdAt).toLocaleDateString()}</td>
-              <td>{u.isBlocked ? "Yes" : "No"}</td>
-              <td>
-                {u.isBlocked ? (
-                  <Button
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleUnblock(u.id)}
-                  >
-                    Unblock
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleBlock(u.id)}
-                  >
-                    Block
-                  </Button>
-                )}
-                {u.role === "ADMIN" ? (
-                  <Button
-                    size="sm"
-                    variant="warning"
-                    className="me-2"
-                    onClick={() => handleRevoke(u.id)}
-                  >
-                    Revoke
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="success"
-                    className="me-2"
-                    onClick={() => handleGrant(u.id)}
-                  >
-                    Grant
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => handleDelete(u.id)}
-                >
+    <Container fluid>
+      <Row noGutters>
+        {/* Sidebar */}
+        <Col xs={2} className="border-end vh-100 bg-light">
+          <Nav defaultActiveKey="/admin" className="flex-column p-3">
+            <Nav.Link as={Link} to="/farms">
+              🏞 Farms
+            </Nav.Link>
+            <Nav.Link as={Link} to="/admin">
+              👤 User Management
+            </Nav.Link>
+            <Nav.Link as={Link} to="/settings">
+              ⚙ Settings
+            </Nav.Link>
+          </Nav>
+        </Col>
+
+        {/* Main content */}
+        <Col xs={10} className="p-4">
+          <h4 className="mb-4">User Management</h4>
+
+          {/* Search + Bulk Actions */}
+          <div className="d-flex align-items-center mb-3">
+            <InputGroup style={{ maxWidth: 300 }}>
+              <FormControl placeholder="Search users..." />
+              <Button variant="outline-secondary">Search</Button>
+            </InputGroup>
+
+            <Dropdown className="ms-2">
+              <Dropdown.Toggle variant="secondary" id="bulk-actions">
+                Actions ▼
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => bulkAction("block")}>
+                  Block
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => bulkAction("grant")}>
+                  Grant Admin
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => bulkAction("delete")}>
                   Delete
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+
+          {/* Users table */}
+          <Table hover responsive>
+            <thead>
+              <tr>
+                <th>
+                  <Form.Check
+                    checked={selected.size === users.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Last Login</th>
+                <th style={{ width: 100 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td>
+                    <Form.Check
+                      checked={selected.has(u.id)}
+                      onChange={() => toggleSelect(u.id)}
+                    />
+                  </td>
+                  <td>
+                    <Link to={`/users/${u.id}`} className="fw-bold">
+                      {u.username}
+                    </Link>
+                  </td>
+                  <td>{u.email}</td>
+                  <td>{u.phone || "—"}</td>
+                  <td>{u.role === "ADMIN" ? "Admin" : "Analyst"}</td>
+                  <td>{new Date(u.lastLogin).toLocaleString()}</td>
+                  <td>
+                    <Dropdown align="end">
+                      <Dropdown.Toggle variant="light" size="sm">
+                        ...
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {u.isBlocked ? (
+                          <Dropdown.Item
+                            onClick={() => userAction(u.id, "unblock")}
+                          >
+                            Unblock
+                          </Dropdown.Item>
+                        ) : (
+                          <Dropdown.Item
+                            onClick={() => userAction(u.id, "block")}
+                          >
+                            Block
+                          </Dropdown.Item>
+                        )}
+                        {u.role === "ADMIN" ? (
+                          <Dropdown.Item
+                            onClick={() => userAction(u.id, "revoke")}
+                          >
+                            Revoke Admin
+                          </Dropdown.Item>
+                        ) : (
+                          <Dropdown.Item
+                            onClick={() => userAction(u.id, "grant")}
+                          >
+                            Grant Admin
+                          </Dropdown.Item>
+                        )}
+                        <Dropdown.Divider />
+                        <Dropdown.Item
+                          className="text-danger"
+                          onClick={() => userAction(u.id, "delete")}
+                        >
+                          Delete
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
     </Container>
   );
 }
-
 export default Admin;
-
