@@ -14,6 +14,7 @@ function TemplateEditor() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
+  const [theme, setTheme] = useState("PERSONAL");
   const [isPublic, setIsPublic] = useState(true);
   const [error, setError] = useState("");
 
@@ -41,6 +42,7 @@ function TemplateEditor() {
         setTitle(data.title);
         setDescription(data.description);
         setContent(data.content);
+        setTheme(data.theme);
         setIsPublic(data.isPublic);
         setImageUrl(data.imageUrl || "");
 
@@ -97,7 +99,6 @@ function TemplateEditor() {
       .catch(console.error);
   }, []);
 
-
   const handleTagsChange = (newValue) => {
     setSelectedTags(newValue || []);
   };
@@ -136,6 +137,7 @@ function TemplateEditor() {
         title,
         description,
         content,
+        theme,
         isPublic,
         imageUrl,
         tags: selectedTags.map((t) => t.value),
@@ -226,6 +228,17 @@ function TemplateEditor() {
         </Form.Group>
 
         <Form.Group className="mb-3">
+          <Form.Label>Theme</Form.Label>
+          <Form.Select value={theme} onChange={(e) => setTheme(e.target.value)}>
+            <option value="PERSONAL">Personal</option>
+            <option value="BUSINESS">Business</option>
+            <option value="EDUCATION">Education</option>
+            <option value="HEALTH">Health</option>
+            <option value="OTHER">Other</option>
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
           <Form.Label>Content</Form.Label>
           <MDEditor value={content} onChange={setContent} />
         </Form.Group>
@@ -248,7 +261,10 @@ function TemplateEditor() {
                           {...drag.draggableProps}
                           className="border p-2 mb-2"
                         >
-                          <div {...drag.dragHandleProps} style={{ cursor: "move" }}>
+                          <div
+                            {...drag.dragHandleProps}
+                            style={{ cursor: "move" }}
+                          >
                             Drag
                           </div>
                           <Form.Control
@@ -256,7 +272,10 @@ function TemplateEditor() {
                             placeholder="Question text"
                             value={q.text}
                             onChange={(e) =>
-                              updateQuestion(idx, { ...q, text: e.target.value })
+                              updateQuestion(idx, {
+                                ...q,
+                                text: e.target.value,
+                              })
                             }
                           />
                           <Form.Select
@@ -266,14 +285,15 @@ function TemplateEditor() {
                               const newType = e.target.value;
                               if (
                                 newType !== q.type &&
-                                questions.filter((qq) => qq.type === newType).length >=
-                                  QUESTION_LIMITS[newType]
+                                questions.filter((qq) => qq.type === newType)
+                                  .length >= QUESTION_LIMITS[newType]
                               )
                                 return;
                               updateQuestion(idx, {
                                 ...q,
                                 type: newType,
-                                options: newType === "CHECKBOX" ? q.options : [],
+                                options:
+                                  newType === "CHECKBOX" ? q.options : [],
                               });
                             }}
                           >
@@ -320,7 +340,6 @@ function TemplateEditor() {
             Add Question
           </Button>
         </Form.Group>
-
 
         <Form.Group className="mb-3 form-check">
           <Form.Check

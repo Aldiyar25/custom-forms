@@ -58,7 +58,7 @@ function TemplateDetail() {
         })),
       };
       // Submit form answers to backend
-      await api.post('/forms', payload);
+      await api.post("/forms", payload);
       setSubmitted(true);
     } catch (err) {
       console.error(err);
@@ -88,6 +88,9 @@ function TemplateDetail() {
         <Card.Body>
           <Card.Title>{tpl.title}</Card.Title>
           <Card.Text>{tpl.description}</Card.Text>
+          <Card.Subtitle className="text-muted">
+            Theme: {tpl.theme}
+          </Card.Subtitle>
         </Card.Body>
       </Card>
 
