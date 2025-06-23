@@ -41,7 +41,9 @@ export const createTemplate = async (req, res) => {
           })),
         },
         allowedUsers: {
-          create: allowedUserIds.map((uid) => ({ user: { connect: { id: uid } } })),
+          create: allowedUserIds.map((uid) => ({
+            user: { connect: { id: uid } },
+          })),
         },
       },
       include: { tags: true, questions: true, allowedUsers: true },
@@ -143,6 +145,20 @@ export const updateTemplate = async (req, res) => {
 
 export const deleteTemplate = async (req, res) => {
   const id = +req.params.id;
-  await prisma.template.delete({ where: { id } });
-  res.json({ message: "Template deleted successfully" });
+  try {
+    await prisma.$transaction([
+      prisma.comment.deleteMany({ where: { templateId: id } }),
+      prisma.like.deleteMany({ where: { templateId: id } }),
+      prisma.templateAccess.deleteMany({ where: { templateId: id } }),
+      prisma.answer.deleteMany({ where: { form: { templateId: id } } }),
+      prisma.form.deleteMany({ where: { templateId: id } }),
+      prisma.option.deleteMany({ where: { question: { templateId: id } } }),
+      prisma.question.deleteMany({ where: { templateId: id } }),
+      prisma.template.delete({ where: { id } }),
+    ]);
+    res.json({ message: "Template deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error deleting template" });
+  }
 };
