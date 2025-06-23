@@ -5,18 +5,19 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { useContext } from "react";
+import { Suspense, useContext, lazy } from "react";
+import { Spinner } from "react-bootstrap";
 import { AuthContext } from "./contexts/AuthContext";
 
 import Header from "./components/Header";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Home from "./pages/Home";
-import TemplateDetail from "./pages/TemplateDetail";
-import TemplateEditor from "./pages/TemplateEditor";
-import SearchResults from "./pages/SearchResults";
-import Profile from "./pages/Profile";
-import Admin from "./pages/Admin";
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Home = lazy(() => import("./pages/Home"));
+const TemplateDetail = lazy(() => import("./pages/TemplateDetail"));
+const TemplateEditor = lazy(() => import("./pages/TemplateEditor"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 function PrivateRoute({ children }) {
   const { user } = useContext(AuthContext);
@@ -35,53 +36,61 @@ function AppLayout() {
     <>
       {!noHeader.includes(location.pathname) && <Header />}
 
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <Suspense
+        fallback={
+          <div className="d-flex justify-content-center mt-5">
+            <Spinner />
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        <Route path="/search" element={<SearchResults />} />
+          <Route path="/search" element={<SearchResults />} />
 
-        <Route path="/templates/:id" element={<TemplateDetail />} />
+          <Route path="/templates/:id" element={<TemplateDetail />} />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/templates/new"
-          element={
-            <PrivateRoute>
-              <TemplateEditor />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/templates/:id/edit"
-          element={
-            <PrivateRoute>
-              <TemplateDetail />
-            </PrivateRoute>
-          }
-        />
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/templates/new"
+            element={
+              <PrivateRoute>
+                <TemplateEditor />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/templates/:id/edit"
+            element={
+              <PrivateRoute>
+                <TemplateDetail />
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <Admin />
-            </AdminRoute>
-          }
-        />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Admin />
+              </AdminRoute>
+            }
+          />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }
