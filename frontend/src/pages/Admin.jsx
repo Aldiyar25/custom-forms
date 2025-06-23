@@ -1,5 +1,12 @@
 import { useContext, useEffect, useState } from "react";
-import { Container, Table, Button, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Button,
+  Spinner,
+  Form,
+  ButtonGroup,
+} from "react-bootstrap";
 import api from "../api/axios";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +16,7 @@ function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const fetchUsers = () => {
     setLoading(true);
@@ -29,35 +37,62 @@ function Admin() {
     );
   };
 
-  const handleBlock = async (id) => {
-    await api.patch(`/admin/users/${id}/block`);
-    updateUser(id, { isBlocked: true });
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   };
 
-  const handleUnblock = async (id) => {
-    await api.patch(`/admin/users/${id}/unblock`);
-    updateUser(id, { isBlocked: false });
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this user?")) return;
-    await api.delete(`/admin/users/${id}`);
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-  };
-
-  const handleGrant = async (id) => {
-    await api.patch(`/admin/users/${id}/grant`);
-    updateUser(id, { role: "ADMIN" });
-  };
-
-  const handleRevoke = async (id) => {
-    await api.patch(`/admin/users/${id}/revoke`);
-    if (user.id === id) {
-      logout();
-      navigate("/login", { replace: true });
+  const toggleSelectAll = () => {
+    if (selectedIds.length === users.length) {
+      setSelectedIds([]);
     } else {
-      updateUser(id, { role: "USER" });
+      setSelectedIds(users.map((u) => u.id));
     }
+  };
+
+  const selectedUsers = users.filter((u) => selectedIds.includes(u.id));
+  const allSelectedBlocked =
+    selectedUsers.length > 0 && selectedUsers.every((u) => u.isBlocked);
+  const allSelectedAdmin =
+    selectedUsers.length > 0 && selectedUsers.every((u) => u.role === "ADMIN");
+
+  const handleToggleBlockSelected = async () => {
+    for (const u of selectedUsers) {
+      if (u.isBlocked) {
+        await api.patch(`/admin/users/${u.id}/unblock`);
+        updateUser(u.id, { isBlocked: false });
+      } else {
+        await api.patch(`/admin/users/${u.id}/block`);
+        updateUser(u.id, { isBlocked: true });
+      }
+    }
+  };
+
+  const handleToggleAdminSelected = async () => {
+    for (const u of selectedUsers) {
+      if (u.role === "ADMIN") {
+        await api.patch(`/admin/users/${u.id}/revoke`);
+        if (user.id === u.id) {
+          logout();
+          navigate("/login", { replace: true });
+        } else {
+          updateUser(u.id, { role: "USER" });
+        }
+      } else {
+        await api.patch(`/admin/users/${u.id}/grant`);
+        updateUser(u.id, { role: "ADMIN" });
+      }
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!window.confirm("Delete selected users?")) return;
+    for (const id of selectedIds) {
+      await api.delete(`/admin/users/${id}`);
+    }
+    setUsers((prev) => prev.filter((u) => !selectedIds.includes(u.id)));
+    setSelectedIds([]);
   };
 
   if (loading) {
@@ -70,71 +105,69 @@ function Admin() {
 
   return (
     <Container>
-      <h3 className="mb-3">User Management</h3>
+      <div className="d-flex align-items-center justify-content-between mb-3">
+        <h3 className="mb-0">User Management</h3>
+        <ButtonGroup>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleToggleBlockSelected}
+            disabled={selectedIds.length === 0}
+          >
+            {allSelectedBlocked ? "Unblock" : "Block"}
+          </Button>
+          <Button
+            size="sm"
+            variant="warning"
+            onClick={handleToggleAdminSelected}
+            disabled={selectedIds.length === 0}
+          >
+            {allSelectedAdmin ? "Revoke" : "Grant"}
+          </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={handleDeleteSelected}
+            disabled={selectedIds.length === 0}
+          >
+            Delete
+          </Button>
+        </ButtonGroup>
+      </div>
       <Table striped bordered hover size="sm">
         <thead>
           <tr>
+            <th>
+              <Form.Check
+                type="checkbox"
+                checked={
+                  selectedIds.length === users.length && users.length > 0
+                }
+                onChange={toggleSelectAll}
+              />
+            </th>
             <th>Username</th>
             <th>Email</th>
             <th>Role</th>
             <th>Joined</th>
             <th>Blocked</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {users.map((u) => (
             <tr key={u.id}>
+              <td>
+                <Form.Check
+                  type="checkbox"
+                  checked={selectedIds.includes(u.id)}
+                  onChange={() => toggleSelect(u.id)}
+                />
+              </td>
               <td>{u.username}</td>
               <td>{u.email}</td>
               <td>{u.role}</td>
               <td>{new Date(u.createdAt).toLocaleDateString()}</td>
               <td>{u.isBlocked ? "Yes" : "No"}</td>
-              <td>
-                {u.isBlocked ? (
-                  <Button
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleUnblock(u.id)}
-                  >
-                    Unblock
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleBlock(u.id)}
-                  >
-                    Block
-                  </Button>
-                )}
-                {u.role === "ADMIN" ? (
-                  <Button
-                    size="sm"
-                    variant="warning"
-                    className="me-2"
-                    onClick={() => handleRevoke(u.id)}
-                  >
-                    Revoke
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="success"
-                    className="me-2"
-                    onClick={() => handleGrant(u.id)}
-                  >
-                    Grant
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => handleDelete(u.id)}
-                >
-                  Delete
-                </Button>
-              </td>
             </tr>
           ))}
         </tbody>
@@ -144,4 +177,3 @@ function Admin() {
 }
 
 export default Admin;
-
