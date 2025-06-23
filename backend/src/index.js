@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 import authRoutes from "./routes/auth.js";
 import { verifyToken } from "./middlewares/auth.js";
 import templateRoutes from "./routes/templates.js";
@@ -25,6 +26,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/uploads", express.static(path.join(process.cwd(), "src", "uploads")));
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/templates", templateRoutes);

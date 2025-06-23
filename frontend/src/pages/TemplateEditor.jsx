@@ -183,6 +183,15 @@ function TemplateEditor() {
 
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
+          <Form.Label>Title</Form.Label>
+          <Form.Control
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
           <Form.Label>Image (optional)</Form.Label>
           <div
             {...getRootProps()}
