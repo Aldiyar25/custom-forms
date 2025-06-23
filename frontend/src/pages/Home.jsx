@@ -75,7 +75,11 @@ function Home() {
           <Row xs={1} sm={2} className="g-4 mb-5">
             {latest.map((tpl) => (
               <Col key={tpl.id}>
-                <Card className="h-100">
+                <Card
+                  className="h-100"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/templates/${tpl.id}`)}
+                >
                   {tpl.imageUrl ? (
                     <Card.Img
                       variant="top"
@@ -99,14 +103,6 @@ function Home() {
                     <Badge bg="info" className="mb-2">
                       {tpl.tags[0]?.name || "Other"}
                     </Badge>
-                    <div>
-                      <Button
-                        size="sm"
-                        onClick={() => navigate(`/templates/${tpl.id}`)}
-                      >
-                        View
-                      </Button>
-                    </div>
                   </Card.Body>
                 </Card>
               </Col>

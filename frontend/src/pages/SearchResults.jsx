@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Container, Row, Col, Card, Badge, Button, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Badge,
+  Button,
+  Spinner,
+} from "react-bootstrap";
 import api from "../api/axios";
 
 function SearchResults() {
@@ -35,28 +43,34 @@ function SearchResults() {
       <Row xs={1} sm={2} className="g-4">
         {templates.map((tpl) => (
           <Col key={tpl.id}>
-            <Card className="h-100">
+            <Card
+              className="h-100"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/templates/${tpl.id}`)}
+            >
               {tpl.imageUrl ? (
-                <Card.Img variant="top" src={tpl.imageUrl} style={{ height: 180, objectFit: "cover" }} />
+                <Card.Img
+                  variant="top"
+                  src={tpl.imageUrl}
+                  style={{ height: 180, objectFit: "cover" }}
+                />
               ) : (
                 <div style={{ height: 180, background: "#f0f0f0" }} />
               )}
               <Card.Body>
                 <Card.Title>{tpl.title}</Card.Title>
-                <Card.Text className="text-truncate">{tpl.description}</Card.Text>
+                <Card.Text className="text-truncate">
+                  {tpl.description}
+                </Card.Text>
                 <div className="mb-2">
                   <small className="text-muted">
-                    by {tpl.author.username} · {new Date(tpl.createdAt).toLocaleDateString()}
+                    by {tpl.author.username} ·{" "}
+                    {new Date(tpl.createdAt).toLocaleDateString()}
                   </small>
                 </div>
                 <Badge bg="info" className="mb-2">
                   {tpl.tags[0]?.name || "Other"}
                 </Badge>
-                <div>
-                  <Button size="sm" onClick={() => navigate(`/templates/${tpl.id}`)}>
-                    View
-                  </Button>
-                </div>
               </Card.Body>
             </Card>
           </Col>
