@@ -22,7 +22,7 @@ export default function Login() {
   return (
     <div
       className="d-flex justify-content-center align-items-center"
-      style={{ minHeight: "100vh", background: "#f8f9fa" }}
+      style={{ minHeight: "100vh", background: "var(--bs-body-bg)" }}
     >
       <div className="card p-4" style={{ width: "100%", maxWidth: "400px" }}>
         <div className="container mt-5" style={{ maxWidth: 400 }}>

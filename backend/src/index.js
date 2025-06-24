@@ -15,6 +15,7 @@ import userRoutes from "./routes/users.js";
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", true);
 const FRONTEND_URL =
   process.env.FRONTEND_URL || "https://custom-forms-ui.onrender.com";
 

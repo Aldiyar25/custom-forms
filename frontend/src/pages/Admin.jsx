@@ -110,7 +110,7 @@ function Admin() {
         <ButtonGroup>
           <Button
             size="sm"
-            variant="secondary"
+            variant="btn btn-outline-primary"
             onClick={handleToggleBlockSelected}
             disabled={selectedIds.length === 0}
           >
@@ -118,7 +118,7 @@ function Admin() {
           </Button>
           <Button
             size="sm"
-            variant="warning"
+            variant="btn btn-outline-primary"
             onClick={handleToggleAdminSelected}
             disabled={selectedIds.length === 0}
           >
@@ -126,7 +126,7 @@ function Admin() {
           </Button>
           <Button
             size="sm"
-            variant="danger"
+            variant="btn btn-outline-primary"
             onClick={handleDeleteSelected}
             disabled={selectedIds.length === 0}
           >
