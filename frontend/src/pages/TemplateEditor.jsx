@@ -226,6 +226,7 @@ function TemplateEditor() {
         <Form.Group className="mb-3">
           <Form.Label>Tags</Form.Label>
           <CreatableSelect
+            classNamePrefix="tags"
             isMulti
             options={tagOptions}
             value={selectedTags}
