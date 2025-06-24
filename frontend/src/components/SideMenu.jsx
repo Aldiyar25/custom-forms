@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { ThemeContext } from "../contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 function SideMenu({ show, handleClose }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
+  const { t } = useTranslation();
 
   const go = (path) => {
     handleClose();
@@ -17,7 +19,7 @@ function SideMenu({ show, handleClose }) {
   return (
     <Offcanvas show={show} onHide={handleClose} placement="start">
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Menu</Offcanvas.Title>
+        <Offcanvas.Title>{t("Menu")}</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
         <Nav className="flex-column">
@@ -63,7 +65,7 @@ function SideMenu({ show, handleClose }) {
             className="mb-2"
             onClick={toggleTheme}
           >
-            {theme === "light" ? "Switch to dark" : "Switch to light"}
+            {theme === "light" ? t("Switch to dark") : t("Switch to light")}
           </Button>
           {user ? (
             <>
@@ -74,7 +76,7 @@ function SideMenu({ show, handleClose }) {
                   className="mb-2"
                   onClick={() => go("/admin")}
                 >
-                  Admin
+                  {t("Admin")}
                 </Button>
               )}
               <Button
@@ -83,7 +85,7 @@ function SideMenu({ show, handleClose }) {
                 className="mb-2"
                 onClick={() => go("/profile")}
               >
-                Profile
+                {t("Profile")}
               </Button>
               <Button
                 variant="outline-danger"
@@ -93,7 +95,7 @@ function SideMenu({ show, handleClose }) {
                   close();
                 }}
               >
-                Log out
+                {t("Log out")}
               </Button>
             </>
           ) : (
@@ -102,7 +104,7 @@ function SideMenu({ show, handleClose }) {
               size="sm"
               onClick={() => go("/login")}
             >
-              Log in
+              {t("Log in")}
             </Button>
           )}
         </Nav>

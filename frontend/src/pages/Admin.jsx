@@ -10,9 +10,11 @@ import {
 import api from "../api/axios";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function Admin() {
   const { user, logout } = useContext(AuthContext);
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ function Admin() {
   };
 
   const handleDeleteSelected = async () => {
-    if (!window.confirm("Delete selected users?")) return;
+    if (!window.confirm(t("Delete selected users?"))) return;
     for (const id of selectedIds) {
       await api.delete(`/admin/users/${id}`);
     }
@@ -106,7 +108,7 @@ function Admin() {
   return (
     <Container>
       <div className="d-flex align-items-center justify-content-between mb-3">
-        <h3 className="mb-0">User Management</h3>
+        <h3 className="mb-0">{t("User Management")}</h3>
         <ButtonGroup>
           <Button
             size="sm"
@@ -114,7 +116,7 @@ function Admin() {
             onClick={handleToggleBlockSelected}
             disabled={selectedIds.length === 0}
           >
-            {allSelectedBlocked ? "Unblock" : "Block"}
+            {allSelectedBlocked ? t("Unblock") : t("Block")}
           </Button>
           <Button
             size="sm"
@@ -122,7 +124,7 @@ function Admin() {
             onClick={handleToggleAdminSelected}
             disabled={selectedIds.length === 0}
           >
-            {allSelectedAdmin ? "Revoke" : "Grant"}
+            {allSelectedAdmin ? t("Revoke") : t("Grant")}
           </Button>
           <Button
             size="sm"
@@ -130,7 +132,7 @@ function Admin() {
             onClick={handleDeleteSelected}
             disabled={selectedIds.length === 0}
           >
-            Delete
+            {t("Delete")}
           </Button>
         </ButtonGroup>
       </div>
@@ -146,11 +148,11 @@ function Admin() {
                 onChange={toggleSelectAll}
               />
             </th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Joined</th>
-            <th>Blocked</th>
+            <th>{t("Username")}</th>
+            <th>{t("Email")}</th>
+            <th>{t("Role")}</th>
+            <th>{t("Joined")}</th>
+            <th>{t("Blocked")}</th>
           </tr>
         </thead>
         <tbody>
@@ -167,7 +169,7 @@ function Admin() {
               <td>{u.email}</td>
               <td>{u.role}</td>
               <td>{new Date(u.createdAt).toLocaleDateString()}</td>
-              <td>{u.isBlocked ? "Yes" : "No"}</td>
+              <td>{u.isBlocked ? t("Yes") : t("No")}</td>
             </tr>
           ))}
         </tbody>

@@ -10,6 +10,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import api from "../api/axios";
+import { useTranslation } from "react-i18next";
 
 function SearchResults() {
   const [params] = useSearchParams();
@@ -17,6 +18,7 @@ function SearchResults() {
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!query) return;
@@ -38,8 +40,8 @@ function SearchResults() {
 
   return (
     <Container className="mt-4">
-      <h3>Search results for "{query}"</h3>
-      {templates.length === 0 && <p>No results found.</p>}
+      <h3>{t('Search results for "{{query}}"', { query })}</h3>
+      {templates.length === 0 && <p>{t("No results found.")}</p>}
       <Row xs={1} sm={2} className="g-4">
         {templates.map((tpl) => (
           <Col key={tpl.id}>
@@ -69,7 +71,7 @@ function SearchResults() {
                   </small>
                 </div>
                 <Badge bg="info" className="mb-2">
-                  {tpl.tags[0]?.name || "Other"}
+                  {tpl.tags[0]?.name || t("Other")}
                 </Badge>
               </Card.Body>
             </Card>

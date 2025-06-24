@@ -12,8 +12,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { AuthContext } from "../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 function Home() {
+  const { t } = useTranslation();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -45,7 +47,7 @@ function Home() {
           onClick={() => navigate("/templates/new")}
           className="mb-4"
         >
-          Create Template
+          {t("Create Template")}
         </Button>
       </div>
     );
@@ -71,7 +73,7 @@ function Home() {
       {renderCreateButton()}
       <Row>
         <Col lg={8} className="pe-lg-4">
-          <h3>Latest Templates</h3>
+          <h3>{t("Latest Templates")}</h3>
           <Row xs={1} sm={2} className="g-4 mb-5">
             {latest.map((tpl) => (
               <Col key={tpl.id}>
@@ -101,7 +103,7 @@ function Home() {
                       </small>
                     </div>
                     <Badge bg="info" className="mb-2">
-                      {tpl.tags[0]?.name || "Other"}
+                      {tpl.tags[0]?.name || t("Other")}
                     </Badge>
                   </Card.Body>
                 </Card>
@@ -109,7 +111,7 @@ function Home() {
             ))}
           </Row>
 
-          <h3>Top 5 Templates</h3>
+          <h3>{t("Top 5 Templates")}</h3>
           <ListGroup className="mb-5">
             {popular.map((tpl, i) => (
               <ListGroup.Item
@@ -126,7 +128,7 @@ function Home() {
         </Col>
 
         <Col lg={4}>
-          <h3>Tag Cloud</h3>
+          <h3>{t("Tag Cloud")}</h3>
           <div className="d-flex flex-wrap">
             {Object.entries(tagCounts).map(([tag, cnt]) => (
               <Badge

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Spinner, Card, Button, Form, Alert, Container } from "react-bootstrap";
 import api from "../api/axios";
 import Comments from "../components/Comments.jsx";
+import { useTranslation } from "react-i18next";
 
 function TemplateDetail() {
   const { id } = useParams();
@@ -12,12 +13,13 @@ function TemplateDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     api
       .get(`/templates/${id}`)
       .then(({ data }) => setTpl(data))
-      .catch((err) => setError("Error loading template", err))
+      .catch((err) => setError(t("Error loading template"), err))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -38,7 +40,7 @@ function TemplateDetail() {
   if (!tpl) {
     return (
       <Alert variant="warning" className="m-4">
-        Template not found
+        {t("Template not found")}
       </Alert>
     );
   }
@@ -69,8 +71,10 @@ function TemplateDetail() {
   if (submitted) {
     return (
       <Container className="mt-5">
-        <Alert variant="success">Thank you for submitting the form</Alert>
-        <Button onClick={() => navigate("/")}>Back to home</Button>
+        <Alert variant="success">
+          {t("Thank you for submitting the form")}
+        </Alert>
+        <Button onClick={() => navigate("/")}>{t("Back to home")}</Button>
       </Container>
     );
   }
@@ -94,7 +98,7 @@ function TemplateDetail() {
         </Card.Body>
       </Card>
 
-      <h4>Questions</h4>
+      <h4>{t("Questions")}</h4>
       <Form onSubmit={handleSubmit}>
         {tpl.questions.map((q) => (
           <Form.Group className="mb-3" controlId={`q${q.id}`} key={q.id}>
@@ -148,7 +152,7 @@ function TemplateDetail() {
         ))}
 
         <Button variant="primary" type="submit">
-          Submit
+          {t("Submit")}
         </Button>
       </Form>
       <Comments templateId={tpl.id} initialLikes={tpl.likes} />

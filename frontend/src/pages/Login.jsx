@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -8,6 +9,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +17,7 @@ export default function Login() {
       await login(email, password);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Login error");
+      setError(err.response?.data?.message || t("Login error"));
     }
   };
 
@@ -30,7 +32,7 @@ export default function Login() {
           {error && <div className="alert alert-danger">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label className="form-label">Email</label>
+              <label className="form-label">{t("Email")}</label>
               <input
                 type="email"
                 className="form-control"
@@ -40,7 +42,7 @@ export default function Login() {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Password</label>
+              <label className="form-label">{t("Password")}</label>
               <input
                 type="password"
                 className="form-control"
@@ -49,10 +51,11 @@ export default function Login() {
                 required
               />
             </div>
-            <button className="btn btn-primary w-100">Sign in</button>
+            <button className="btn btn-primary w-100">{t("Sign in")}</button>
           </form>
           <p className="mt-3 text-center">
-            Don't have an account? <Link to="/register">Register</Link>
+            {t("Don't have an account?")}{" "}
+            <Link to="/register">{t("Register")}</Link>
           </p>
         </div>
       </div>

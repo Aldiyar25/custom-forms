@@ -14,6 +14,7 @@ import CreatableSelect from "react-select/creatable";
 import { useDropzone } from "react-dropzone";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../api/axios";
+import { useTranslation } from "react-i18next";
 
 function TemplateEditor() {
   const { id } = useParams();
@@ -41,6 +42,7 @@ function TemplateEditor() {
 
   const [imageUrl, setImageUrl] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!id) return;
@@ -66,7 +68,7 @@ function TemplateEditor() {
           }));
         setQuestions(qs);
       })
-      .catch((err) => setError("Error loading template", err));
+      .catch((err) => setError(t("Error loading template"), err));
   }, [id]);
 
   const onDrop = useCallback(async (acceptedFiles) => {
@@ -86,7 +88,7 @@ function TemplateEditor() {
       setImageUrl(data.url);
     } catch (err) {
       console.error("Error uploading image", err);
-      setError("Error uploading image");
+      setError(t("Error uploading image"));
     }
   }, []);
 
@@ -164,7 +166,7 @@ function TemplateEditor() {
       navigate("/");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Error saving template");
+      setError(err.response?.data?.message || t("Error saving template"));
     }
   };
 
@@ -178,12 +180,12 @@ function TemplateEditor() {
 
   return (
     <Container className="mt-4">
-      <h2>{id ? "Edit template" : "Create new template"}</h2>
+      <h2>{id ? t("Edit template") : t("Create new template")}</h2>
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
-          <Form.Label>Title</Form.Label>
+          <Form.Label>{t("Title")}</Form.Label>
           <Form.Control
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -192,7 +194,7 @@ function TemplateEditor() {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Image (optional)</Form.Label>
+          <Form.Label>{t("Image (optional)")} </Form.Label>
           <div
             {...getRootProps()}
             className={`border p-3 text-center ${
@@ -202,9 +204,9 @@ function TemplateEditor() {
           >
             <input {...getInputProps()} />
             {isDragActive ? (
-              <p>Drop the image here...</p>
+              <p>{t("Drop the image here...")}</p>
             ) : (
-              <p>Drag and drop an image here, or click to select one</p>
+              <p>{t("Drag and drop an image here, or click to select one")}</p>
             )}
           </div>
           {uploadProgress > 0 && uploadProgress < 100 && (
@@ -221,23 +223,23 @@ function TemplateEditor() {
           )}
         </Form.Group>
 
-        <Button type="submit">Save</Button>
+        <Button type="submit">{t("Save")}</Button>
 
         <Form.Group className="mb-3">
-          <Form.Label>Tags</Form.Label>
+          <Form.Label>{t("Tags")}</Form.Label>
           <CreatableSelect
             classNamePrefix="tags"
             isMulti
             options={tagOptions}
             value={selectedTags}
             onChange={handleTagsChange}
-            placeholder="Choose or create tags"
+            placeholder={t("Choose or create tags")}
             formatCreateLabel={(inputValue) => `Create tag "${inputValue}"`}
           />
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Short description</Form.Label>
+          <Form.Label>{t("Short description")}</Form.Label>
           <Form.Control
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -246,23 +248,23 @@ function TemplateEditor() {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Theme</Form.Label>
+          <Form.Label>{t("Theme")}</Form.Label>
           <Form.Select value={theme} onChange={(e) => setTheme(e.target.value)}>
-            <option value="PERSONAL">Personal</option>
-            <option value="BUSINESS">Business</option>
-            <option value="EDUCATION">Education</option>
-            <option value="HEALTH">Health</option>
-            <option value="OTHER">Other</option>
+            <option value="PERSONAL">{t("Personal")}</option>
+            <option value="BUSINESS">{t("Business")}</option>
+            <option value="EDUCATION">{t("Education")}</option>
+            <option value="HEALTH">{t("Health")}</option>
+            <option value="OTHER">{t("Other")}</option>
           </Form.Select>
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Content</Form.Label>
+          <Form.Label>{t("Content")}</Form.Label>
           <MDEditor value={content} onChange={setContent} />
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Questions</Form.Label>
+          <Form.Label>{t("Questions")}</Form.Label>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="questions">
               {(provided) => (
@@ -283,11 +285,11 @@ function TemplateEditor() {
                             {...drag.dragHandleProps}
                             style={{ cursor: "move" }}
                           >
-                            Drag
+                            {t("Drag")}
                           </div>
                           <Form.Control
                             className="mb-2"
-                            placeholder="Question text"
+                            placeholder={t("Question text")}
                             value={q.text}
                             onChange={(e) =>
                               updateQuestion(idx, {
@@ -315,17 +317,17 @@ function TemplateEditor() {
                               });
                             }}
                           >
-                            <option value="TEXT">Short text</option>
-                            <option value="LONG_TEXT">Long text</option>
-                            <option value="NUMBER">Number</option>
-                            <option value="CHECKBOX">Checkbox</option>
+                            <option value="TEXT">{t("Short text")}</option>
+                            <option value="LONG_TEXT">{t("Long text")}</option>
+                            <option value="NUMBER">{t("Number")}</option>
+                            <option value="CHECKBOX">{t("Checkbox")}</option>
                           </Form.Select>
                           {q.type === "CHECKBOX" && (
                             <Form.Control
                               as="textarea"
                               rows={2}
                               className="mb-2"
-                              placeholder="One option per line"
+                              placeholder={t("One option per line")}
                               value={q.options.join("\n")}
                               onChange={(e) =>
                                 updateQuestion(idx, {
@@ -343,7 +345,7 @@ function TemplateEditor() {
                             size="sm"
                             onClick={() => removeQuestion(idx)}
                           >
-                            Delete
+                            {t("Delete")}
                           </Button>
                         </div>
                       )}
@@ -355,14 +357,14 @@ function TemplateEditor() {
             </Droppable>
           </DragDropContext>
           <Button className="mt-2" onClick={addQuestion}>
-            Add Question
+            {t("Add Question")}
           </Button>
         </Form.Group>
 
         <Form.Group className="mb-3 form-check">
           <Form.Check
             type="checkbox"
-            label="Public template"
+            label={t("Public template")}
             checked={isPublic}
             onChange={(e) => setIsPublic(e.target.checked)}
           />
@@ -370,7 +372,7 @@ function TemplateEditor() {
 
         <Button type="submit">
           {" "}
-          {id ? "Save changes" : "Create template"}
+          {id ? t("Save changes") : t("Create template")}
         </Button>
       </Form>
     </Container>

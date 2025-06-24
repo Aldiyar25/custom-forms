@@ -10,11 +10,18 @@ import {
 import { List } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import SideMenu from "./SideMenu";
+import { useTranslation } from "react-i18next";
 
 function Header() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const handleLangChange = (lng) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem("lng", lng);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -39,7 +46,7 @@ function Header() {
             style={{ cursor: "pointer" }}
             onClick={() => navigate("/")}
           >
-            FormsApp
+            {t("Custom Forms")}
           </Navbar.Brand>
 
           <Form
@@ -49,7 +56,7 @@ function Header() {
           >
             <Form.Control
               type="search"
-              placeholder="Search…"
+              placeholder={t("Search…")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -58,11 +65,15 @@ function Header() {
           <Nav className="ms-auto align-items-center">
             <Dropdown className="me-3">
               <Dropdown.Toggle variant="outline-secondary" size="sm">
-                English
+                {t(i18n.language === "ru" ? "Russian" : "English")}
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item>English</Dropdown.Item>
-                <Dropdown.Item>Russian</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleLangChange("en")}>
+                  {t("English")}
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => handleLangChange("ru")}>
+                  {t("Russian")}
+                </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </Nav>

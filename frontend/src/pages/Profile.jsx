@@ -3,10 +3,12 @@ import { Container, Table, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { AuthContext } from "../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 function Profile() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [templates, setTemplates] = useState([]);
   const [forms, setForms] = useState([]);
   const [loadingTpl, setLoadingTpl] = useState(true);
@@ -32,10 +34,10 @@ function Profile() {
   }, [user]);
 
   const deleteTemplate = async (id) => {
-    if (!window.confirm("Delete this template?")) return;
+    if (!window.confirm(t("Delete this template?"))) return;
     try {
       await api.delete(`/templates/${id}`);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
+      setTemplates((prev) => prev.filter((tpl) => tpl.id !== id));
     } catch (err) {
       console.error("Error deleting template", err);
     }
@@ -53,31 +55,42 @@ function Profile() {
 
   return (
     <Container>
-      <h3 className="mb-3">My Templates</h3>
+      <h3 className="mb-3">{t("My Templates")}</h3>
       {loadingTpl ? (
         <Spinner />
       ) : (
         <Table striped bordered hover size="sm">
           <thead>
             <tr>
-              <th>Title</th>
-              <th style={{ cursor: "pointer" }} onClick={() => setTplSortAsc((v) => !v)}>
-                Created {tplSortAsc ? "▲" : "▼"}
+              <th>{t("Title")}</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => setTplSortAsc((v) => !v)}
+              >
+                {t("Created")} {tplSortAsc ? "▲" : "▼"}
               </th>
-              <th>Actions</th>
+              <th>{t("Actions")}</th>
             </tr>
           </thead>
           <tbody>
-            {sortedTemplates.map((t) => (
-              <tr key={t.id}>
-                <td>{t.title}</td>
-                <td>{new Date(t.createdAt).toLocaleDateString()}</td>
+            {sortedTemplates.map((tpl) => (
+              <tr key={tpl.id}>
+                <td>{tpl.title}</td>
+                <td>{new Date(tpl.createdAt).toLocaleDateString()}</td>
                 <td>
-                  <Button size="sm" className="me-2" onClick={() => navigate(`/templates/${t.id}/edit`)}>
-                    Edit
+                  <Button
+                    size="sm"
+                    className="me-2"
+                    onClick={() => navigate(`/templates/${tpl.id}/edit`)}
+                  >
+                    {t("Edit")}
                   </Button>
-                  <Button size="sm" variant="danger" onClick={() => deleteTemplate(t.id)}>
-                    Delete
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => deleteTemplate(tpl.id)}
+                  >
+                    {t("Delete")}
                   </Button>
                 </td>
               </tr>
@@ -86,16 +99,19 @@ function Profile() {
         </Table>
       )}
 
-      <h3 className="mt-5 mb-3">My Forms</h3>
+      <h3 className="mt-5 mb-3">{t("My Forms")}</h3>
       {loadingForms ? (
         <Spinner />
       ) : (
         <Table striped bordered hover size="sm">
           <thead>
             <tr>
-              <th>Template</th>
-              <th style={{ cursor: "pointer" }} onClick={() => setFormSortAsc((v) => !v)}>
-                Submitted {formSortAsc ? "▲" : "▼"}
+              <th>{t("Template")}</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => setFormSortAsc((v) => !v)}
+              >
+                {t("Submitted")} {formSortAsc ? "▲" : "▼"}
               </th>
             </tr>
           </thead>
