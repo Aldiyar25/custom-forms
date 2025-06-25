@@ -13,22 +13,23 @@ if (!fs.existsSync(uploadsDir)) {
 const router = Router();
 
 let upload;
-if (
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET
-) {
+if (process.env.CLOUDINARY_CLOUD_NAME) {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    ...(process.env.CLOUDINARY_API_KEY && {
+      api_key: process.env.CLOUDINARY_API_KEY,
+    }),
+    ...(process.env.CLOUDINARY_API_SECRET && {
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    }),
   });
-  const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder: "uploads",
-    },
-  });
+  const params = {
+    folder: "uploads",
+  };
+  if (process.env.CLOUDINARY_UPLOAD_PRESET) {
+    params.upload_preset = process.env.CLOUDINARY_UPLOAD_PRESET;
+  }
+  const storage = new CloudinaryStorage({ cloudinary, params });
   upload = multer({ storage });
 } else {
   const storage = multer.diskStorage({
