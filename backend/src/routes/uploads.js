@@ -48,7 +48,9 @@ router.post("/", upload.single("file"), (req, res) => {
   const url = req.file.path.startsWith("http")
     ? req.file.path
     : `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-  res.json({ url });
+  const secureUrl = req.file.secure_url || url;
+
+  res.json({ url, secure_url: secureUrl });
 });
 
 export default router;

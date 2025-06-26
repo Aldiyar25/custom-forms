@@ -54,7 +54,12 @@ function TemplateEditor() {
         setContent(data.content);
         setTheme(data.theme);
         setIsPublic(data.isPublic);
-        setImageUrl(data.imageUrl || "");
+        const fullUrl = data.imageUrl
+          ? data.imageUrl.startsWith("http")
+            ? data.imageUrl
+            : `${import.meta.env.VITE_API_URL}${data.imageUrl}`
+          : "";
+        setImageUrl(fullUrl);
 
         const sel = data.tags.map((t) => ({ label: t.name, value: t.name }));
         setSelectedTags(sel);
@@ -85,7 +90,7 @@ function TemplateEditor() {
           setUploadProgress(Math.round((loaded / total) * 100));
         },
       });
-      setImageUrl(data.url);
+      setImageUrl(data.secure_url || data.url);
     } catch (err) {
       console.error("Error uploading image", err);
       setError(t("Error uploading image"));

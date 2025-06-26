@@ -53,7 +53,11 @@ function SearchResults() {
               {tpl.imageUrl ? (
                 <Card.Img
                   variant="top"
-                  src={tpl.imageUrl}
+                  src={
+                    tpl.imageUrl.startsWith("http")
+                      ? tpl.imageUrl
+                      : `${import.meta.env.VITE_API_URL}${tpl.imageUrl}`
+                  }
                   style={{ height: 180, objectFit: "cover" }}
                 />
               ) : (
