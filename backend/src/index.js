@@ -29,6 +29,7 @@ app.use(
 app.use(express.json());
 app.use(
   "/uploads",
+  cors({ origin: FRONTEND_URL || "http://localhost:5173" }),
   express.static(path.join(process.cwd(), "src", "uploads"), {
     setHeaders: (res) => {
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
