@@ -8,9 +8,12 @@ export const createForm = async (req, res) => {
       where: { id: templateId },
       include: { allowedUsers: true },
     });
-    if (!template) return res.status(404).json({ message: "Template not found" });
+    if (!template)
+      return res.status(404).json({ message: "Template not found" });
     if (!template.isPublic) {
-      const allowed = template.allowedUsers.some((au) => au.userId === req.user.id);
+      const allowed = template.allowedUsers.some(
+        (au) => au.userId === req.user.id
+      );
       if (!allowed && req.user.role !== "ADMIN") {
         return res.status(403).json({ message: "Access denied" });
       }
@@ -41,7 +44,10 @@ export const getForms = async (req, res) => {
   if (userId) where.userId = +userId;
   if (templateId) where.templateId = +templateId;
 
-  if (!req.user || (userId && +userId !== req.user.id && req.user.role !== "ADMIN")) {
+  if (
+    !req.user ||
+    (userId && +userId !== req.user.id && req.user.role !== "ADMIN")
+  ) {
     return res.status(403).json({ message: "Access denied" });
   }
 
@@ -100,5 +106,34 @@ export const deleteAnswer = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error deleting answer" });
+  }
+};
+
+export const getFormById = async (req, res) => {
+  const id = +req.params.id;
+  try {
+    const form = await prisma.form.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        template: { include: { author: true } },
+        answers: { include: { question: { select: { text: true } } } },
+      },
+    });
+    if (!form) return res.status(404).json({ message: "Form not found" });
+
+    const tpl = form.template;
+    const isOwner = req.user && req.user.id === form.userId;
+    const isTplAuthor = req.user && req.user.id === tpl.authorId;
+    const isAdmin = req.user && req.user.role === "ADMIN";
+
+    if (!tpl.isPublic && !(isOwner || isTplAuthor || isAdmin)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    res.json(form);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching form" });
   }
 };

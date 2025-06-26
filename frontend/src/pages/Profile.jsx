@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Container, Table, Button, Spinner } from "react-bootstrap";
+import { Container, Table, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { AuthContext } from "../contexts/AuthContext";
@@ -33,16 +33,6 @@ function Profile() {
       .finally(() => setLoadingForms(false));
   }, [user]);
 
-  const deleteTemplate = async (id) => {
-    if (!window.confirm(t("Delete this template?"))) return;
-    try {
-      await api.delete(`/templates/${id}`);
-      setTemplates((prev) => prev.filter((tpl) => tpl.id !== id));
-    } catch (err) {
-      console.error("Error deleting template", err);
-    }
-  };
-
   const sortedTemplates = [...templates].sort((a, b) => {
     const res = new Date(a.createdAt) - new Date(b.createdAt);
     return tplSortAsc ? res : -res;
@@ -69,30 +59,17 @@ function Profile() {
               >
                 {t("Created")} {tplSortAsc ? "▲" : "▼"}
               </th>
-              <th>{t("Actions")}</th>
             </tr>
           </thead>
           <tbody>
             {sortedTemplates.map((tpl) => (
-              <tr key={tpl.id}>
+              <tr
+                key={tpl.id}
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/templates/${tpl.id}`)}
+              >
                 <td>{tpl.title}</td>
                 <td>{new Date(tpl.createdAt).toLocaleDateString()}</td>
-                <td>
-                  <Button
-                    size="sm"
-                    className="me-2"
-                    onClick={() => navigate(`/templates/${tpl.id}/edit`)}
-                  >
-                    {t("Edit")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => deleteTemplate(tpl.id)}
-                  >
-                    {t("Delete")}
-                  </Button>
-                </td>
               </tr>
             ))}
           </tbody>

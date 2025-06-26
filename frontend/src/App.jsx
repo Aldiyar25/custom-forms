@@ -18,6 +18,8 @@ const TemplateEditor = lazy(() => import("./pages/TemplateEditor"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Admin = lazy(() => import("./pages/Admin"));
+const TemplateAnalytics = lazy(() => import("./pages/TemplateAnalytics"));
+const FormDetail = lazy(() => import("./pages/FormDetail"));
 
 function PrivateRoute({ children }) {
   const { user } = useContext(AuthContext);
@@ -47,9 +49,16 @@ function AppLayout() {
           <Route path="/" element={<Home />} />
 
           <Route path="/search" element={<SearchResults />} />
-
+          <Route path="/forms/:id" element={<FormDetail />} />
           <Route path="/templates/:id" element={<TemplateDetail />} />
-
+          <Route
+            path="/templates/:id/analytics"
+            element={
+              <PrivateRoute>
+                <TemplateAnalytics />
+              </PrivateRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
@@ -74,7 +83,7 @@ function AppLayout() {
             path="/templates/:id/edit"
             element={
               <PrivateRoute>
-                <TemplateDetail />
+                <TemplateEditor />
               </PrivateRoute>
             }
           />

@@ -162,3 +162,127 @@ export const deleteTemplate = async (req, res) => {
     res.status(500).json({ message: "Error deleting template" });
   }
 };
+
+export const getTemplateAnalytics = async (req, res) => {
+  const id = +req.params.id;
+  try {
+    const template = await prisma.template.findUnique({
+      where: { id },
+      include: { questions: { include: { options: true } }, author: true },
+    });
+    if (!template) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+
+    if (
+      !req.user ||
+      (template.authorId !== req.user.id && req.user.role !== "ADMIN")
+    ) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const analytics = [];
+
+    for (const q of template.questions) {
+      const answers = await prisma.answer.findMany({
+        where: { questionId: q.id },
+        select: { answerText: true },
+      });
+
+      if (q.type === "NUMBER") {
+        const numbers = answers
+          .map((a) => parseFloat(a.answerText))
+          .filter((n) => !isNaN(n));
+        const count = numbers.length;
+        const sum = numbers.reduce((acc, n) => acc + n, 0);
+        const avg = count ? sum / count : null;
+        const min = count ? Math.min(...numbers) : null;
+        const max = count ? Math.max(...numbers) : null;
+        analytics.push({
+          questionId: q.id,
+          question: q.text,
+          type: q.type,
+          count,
+          average: avg,
+          min,
+          max,
+        });
+      } else if (q.type === "CHECKBOX") {
+        const counts = {};
+        answers.forEach((a) => {
+          try {
+            const values = JSON.parse(a.answerText);
+            if (Array.isArray(values)) {
+              values.forEach((v) => {
+                counts[v] = (counts[v] || 0) + 1;
+              });
+            } else if (a.answerText) {
+              counts[a.answerText] = (counts[a.answerText] || 0) + 1;
+            }
+          } catch {
+            if (a.answerText) {
+              const vals = a.answerText.split(",");
+              vals.forEach((v) => {
+                const val = v.trim();
+                if (val) counts[val] = (counts[val] || 0) + 1;
+              });
+            }
+          }
+        });
+        analytics.push({
+          questionId: q.id,
+          question: q.text,
+          type: q.type,
+          counts,
+        });
+      } else {
+        analytics.push({
+          questionId: q.id,
+          question: q.text,
+          type: q.type,
+          answers: answers.map((a) => a.answerText),
+        });
+      }
+    }
+
+    res.json({ templateId: template.id, analytics });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error generating analytics" });
+  }
+};
+
+export const getTemplateResponses = async (req, res) => {
+  const id = +req.params.id;
+  try {
+    const template = await prisma.template.findUnique({ where: { id } });
+    if (!template) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+
+    if (
+      !req.user ||
+      (template.authorId !== req.user.id && req.user.role !== "ADMIN")
+    ) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const forms = await prisma.form.findMany({
+      where: { templateId: id },
+      orderBy: { submittedAt: "desc" },
+      include: {
+        user: true,
+        answers: {
+          include: {
+            question: { select: { text: true } },
+          },
+        },
+      },
+    });
+
+    res.json({ templateId: template.id, forms });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching responses" });
+  }
+};

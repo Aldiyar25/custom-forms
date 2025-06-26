@@ -6,6 +6,8 @@ import {
   searchTemplates,
   updateTemplate,
   deleteTemplate,
+  getTemplateAnalytics,
+  getTemplateResponses,
 } from "../controllers/templateController.js";
 
 import {
@@ -20,6 +22,8 @@ const router = Router();
 router.get("/", getAllTemplates);
 router.get("/search", searchTemplates);
 router.get("/:id", getTemplateById);
+router.get("/:id/analytics", verifyToken, getTemplateAnalytics);
+router.get("/:id/responses", verifyToken, getTemplateResponses);
 router.post("/", verifyToken, createTemplate);
 router.put("/:id", verifyToken, isOwnerOrAdmin("template"), updateTemplate);
 router.delete("/:id", verifyToken, isOwnerOrAdmin("template"), deleteTemplate);

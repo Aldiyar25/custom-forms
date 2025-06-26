@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Spinner, Card, Button, Form, Alert, Container } from "react-bootstrap";
 import api from "../api/axios";
 import Comments from "../components/Comments.jsx";
 import { useTranslation } from "react-i18next";
+import { AuthContext } from "../contexts/AuthContext";
 
 function TemplateDetail() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ function TemplateDetail() {
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { t } = useTranslation();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     api
@@ -68,6 +70,17 @@ function TemplateDetail() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm(t("Delete this template?"))) return;
+    try {
+      await api.delete(`/templates/${tpl.id}`);
+      navigate("/profile");
+    } catch (err) {
+      console.error(err);
+      setError(t("Error deleting template"));
+    }
+  };
+
   if (submitted) {
     return (
       <Container className="mt-5">
@@ -95,6 +108,20 @@ function TemplateDetail() {
           <Card.Subtitle className="text-muted">
             Theme: {tpl.theme}
           </Card.Subtitle>
+          {(user?.role === "ADMIN" || user?.id === tpl.authorId) && (
+            <div className="mt-3">
+              <Button
+                size="sm"
+                className="me-2"
+                onClick={() => navigate(`/templates/${tpl.id}/edit`)}
+              >
+                {t("Edit")}
+              </Button>
+              <Button size="sm" variant="danger" onClick={handleDelete}>
+                {t("Delete")}
+              </Button>
+            </div>
+          )}
         </Card.Body>
       </Card>
 
@@ -155,6 +182,15 @@ function TemplateDetail() {
           {t("Submit")}
         </Button>
       </Form>
+      {user && (user.id === tpl.authorId || user.role === "ADMIN") && (
+        <Button
+          variant="secondary"
+          className="mt-3"
+          onClick={() => navigate(`/templates/${tpl.id}/analytics`)}
+        >
+          {t("View analytics")}
+        </Button>
+      )}
       <Comments templateId={tpl.id} initialLikes={tpl.likes} />
     </Container>
   );

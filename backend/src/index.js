@@ -27,7 +27,14 @@ app.use(
 );
 
 app.use(express.json());
-app.use("/uploads", express.static(path.join(process.cwd(), "src", "uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "src", "uploads"), {
+    setHeaders: (res) => {
+      res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    },
+  })
+);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/templates", templateRoutes);
