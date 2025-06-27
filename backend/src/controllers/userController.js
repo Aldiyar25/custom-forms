@@ -35,4 +35,4 @@ export const getUserForms = async (req, res) => {
   }
 };
 
-export const asd = async (req, res) => {};
+export const updateUser = async (req, res) => {};
