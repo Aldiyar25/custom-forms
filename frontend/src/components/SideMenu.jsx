@@ -23,43 +23,6 @@ function SideMenu({ show, handleClose }) {
       </Offcanvas.Header>
       <Offcanvas.Body>
         <Nav className="flex-column">
-          {/* <Button
-            variant="outline-primary"
-            className="mb-2"
-            onClick={toggleTheme}
-          >
-            {theme === "light" ? "Switch to dark" : "Switch to light"}
-          </Button>
-          {user && user.role === "ADMIN" && (
-            <Button
-              variant="outline-primary"
-              className="mb-2"
-              onClick={() => go("/admin")}
-            >
-              Admin
-            </Button>
-          )}
-          {user && (
-            <>
-              <Button
-                variant="outline-primary"
-                className="mb-2"
-                onClick={() => go("/profile")}
-              >
-                Profile
-              </Button>
-              <Button
-                variant="outline-danger"
-                className="mb-2"
-                onClick={() => {
-                  logout();
-                  handleClose();
-                }}
-              >
-                Log out
-              </Button>
-            </>
-          )} */}
           <Button
             variant="outline-primary"
             className="mb-2"
@@ -92,7 +55,7 @@ function SideMenu({ show, handleClose }) {
                 size="sm"
                 onClick={() => {
                   logout();
-                  close();
+                  handleClose();
                 }}
               >
                 {t("Log out")}

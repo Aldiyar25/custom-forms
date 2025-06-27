@@ -90,6 +90,7 @@ function TemplateEditor() {
           setUploadProgress(Math.round((loaded / total) * 100));
         },
       });
+      console.log("Cloudinary upload response:", data);
       setImageUrl(data.secure_url || data.url);
     } catch (err) {
       console.error("Error uploading image", err);
