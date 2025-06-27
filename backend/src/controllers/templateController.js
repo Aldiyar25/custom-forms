@@ -120,12 +120,35 @@ export const getTemplateById = async (req, res) => {
 export const updateTemplate = async (req, res) => {
   const id = +req.params.id;
   try {
-    const { allowedUserIds, ...data } = req.body;
+    const { allowedUserIds, tags, questions, ...rest } = req.body;
     const updated = await prisma.template.update({
       where: { id },
       data: {
-        ...data,
-        allowedUsers: allowedUserIds
+        ...rest,
+        tags: Array.isArray(tags)
+          ? {
+              deleteMany: {},
+              connectOrCreate: tags.map((name) => ({
+                where: { name },
+                create: { name },
+              })),
+            }
+          : undefined,
+        questions: Array.isArray(questions)
+          ? {
+              deleteMany: {},
+              create: questions.map((q) => ({
+                text: q.text,
+                type: q.type,
+                order: q.order,
+                options:
+                  q.type === "CHECKBOX"
+                    ? { create: q.options.map((o) => ({ text: o })) }
+                    : undefined,
+              })),
+            }
+          : undefined,
+        allowedUsers: Array.isArray(allowedUserIds)
           ? {
               deleteMany: {},
               create: allowedUserIds.map((uid) => ({
