@@ -94,7 +94,11 @@ function Profile() {
           </thead>
           <tbody>
             {sortedForms.map((f) => (
-              <tr key={f.id}>
+              <tr
+                key={f.id}
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/forms/${f.id}`)}
+              >
                 <td>{f.template.title}</td>
                 <td>{new Date(f.submittedAt).toLocaleDateString()}</td>
               </tr>
