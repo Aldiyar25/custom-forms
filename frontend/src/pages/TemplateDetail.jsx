@@ -1,10 +1,12 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Spinner, Card, Button, Form, Alert, Container } from "react-bootstrap";
+import ReactMarkdown from "react-markdown";
 import api from "../api/axios";
 import Comments from "../components/Comments.jsx";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../contexts/AuthContext";
+import { ThemeContext } from "../contexts/ThemeContext.jsx";
 
 function TemplateDetail() {
   const { id } = useParams();
@@ -16,6 +18,7 @@ function TemplateDetail() {
   const [submitted, setSubmitted] = useState(false);
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     api
@@ -107,11 +110,23 @@ function TemplateDetail() {
           />
         )}
         <Card.Body>
-          <Card.Title>{tpl.title}</Card.Title>
-          <Card.Text>{tpl.description}</Card.Text>
+          <Card.Title className="mb-3">{tpl.title}</Card.Title>
           <Card.Subtitle className="text-muted">
             Theme: {tpl.theme}
           </Card.Subtitle>
+          {tpl.content && (
+            <div className="mt-3">
+              <ReactMarkdown
+                className={`p-3 rounded border ${
+                  theme === "dark" ? "bg-dark text-light" : "bg-white"
+                }`}
+                style={{ whiteSpace: "pre-wrap" }}
+              >
+                {tpl.content}
+              </ReactMarkdown>
+            </div>
+          )}
+
           {(user?.role === "ADMIN" || user?.id === tpl.authorId) && (
             <div className="mt-3">
               <Button

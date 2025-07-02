@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Container,
@@ -15,10 +15,12 @@ import { useDropzone } from "react-dropzone";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../api/axios";
 import { useTranslation } from "react-i18next";
+import { ThemeContext } from "../contexts/ThemeContext.jsx";
 
 function TemplateEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { theme: colorMode } = useContext(ThemeContext);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -245,15 +247,6 @@ function TemplateEditor() {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>{t("Short description")}</Form.Label>
-          <Form.Control
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
           <Form.Label>{t("Theme")}</Form.Label>
           <Form.Select value={theme} onChange={(e) => setTheme(e.target.value)}>
             <option value="PERSONAL">{t("Personal")}</option>
@@ -266,7 +259,14 @@ function TemplateEditor() {
 
         <Form.Group className="mb-3">
           <Form.Label>{t("Content")}</Form.Label>
-          <MDEditor value={content} onChange={setContent} />
+          <MDEditor
+            value={content}
+            onChange={setContent}
+            data-color-mode={colorMode}
+            className={`border rounded ${
+              colorMode === "dark" ? "bg-dark text-light" : "bg-white"
+            }`}
+          />
         </Form.Group>
 
         <Form.Group className="mb-3">
