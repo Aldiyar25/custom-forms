@@ -115,13 +115,12 @@ function TemplateDetail() {
             Theme: {tpl.theme}
           </Card.Subtitle>
           {tpl.content && (
-            <div className="mt-3">
-              <ReactMarkdown
-                className={`p-3 rounded border ${
-                  theme === "dark" ? "bg-dark text-light" : "bg-white"
-                }`}
-                style={{ whiteSpace: "pre-wrap" }}
-              >
+            <div
+              className={`mt-3 p-3 rounded border ${
+                theme === "dark" ? "bg-dark text-light" : "bg-white"
+              }`}
+            >
+              <ReactMarkdown style={{ whiteSpace: "pre-wrap" }}>
                 {tpl.content}
               </ReactMarkdown>
             </div>

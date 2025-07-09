@@ -1,5 +1,12 @@
 import { useContext, useEffect, useState } from "react";
-import { Container, Table, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Spinner,
+  Button,
+  Form,
+  Alert,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { AuthContext } from "../contexts/AuthContext";
@@ -15,6 +22,14 @@ function Profile() {
   const [loadingForms, setLoadingForms] = useState(true);
   const [tplSortAsc, setTplSortAsc] = useState(false);
   const [formSortAsc, setFormSortAsc] = useState(false);
+
+  const [showCrmForm, setShowCrmForm] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [titleVal, setTitleVal] = useState("");
+  const [crmError, setCrmError] = useState("");
+  const [crmSuccess, setCrmSuccess] = useState("");
+  const [crmLoading, setCrmLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -43,8 +58,78 @@ function Profile() {
     return formSortAsc ? res : -res;
   });
 
+  const handleCrmSubmit = async (e) => {
+    e.preventDefault();
+    setCrmError("");
+    setCrmSuccess("");
+    setCrmLoading(true);
+    try {
+      await api.post(`/users/${user.id}/salesforce`, {
+        companyName,
+        phone,
+        title: titleVal,
+      });
+      setCrmSuccess(t("Data sent to Salesforce"));
+      setCompanyName("");
+      setPhone("");
+      setTitleVal("");
+      setShowCrmForm(false);
+    } catch (err) {
+      setCrmError(err.response?.data?.message || t("Error sending data"));
+    } finally {
+      setCrmLoading(false);
+    }
+  };
+
   return (
     <Container>
+      {(user?.role === "ADMIN" || user) && (
+        <div className="mb-4">
+          <Button
+            size="sm"
+            onClick={() => setShowCrmForm((v) => !v)}
+            className="me-2"
+          >
+            {t("Send to Salesforce")}
+          </Button>
+          {crmSuccess && (
+            <Alert variant="success" className="mt-2">
+              {crmSuccess}
+            </Alert>
+          )}
+          {showCrmForm && (
+            <Form onSubmit={handleCrmSubmit} className="mt-3">
+              <Form.Group className="mb-2">
+                <Form.Label>{t("Company Name")}</Form.Label>
+                <Form.Control
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-2">
+                <Form.Label>{t("Title")}</Form.Label>
+                <Form.Control
+                  value={titleVal}
+                  onChange={(e) => setTitleVal(e.target.value)}
+                />
+              </Form.Group>
+              <Form.Group className="mb-2">
+                <Form.Label>{t("Phone")}</Form.Label>
+                <Form.Control
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </Form.Group>
+              {crmError && <Alert variant="danger">{crmError}</Alert>}
+              <Button type="submit" disabled={crmLoading} size="sm">
+                {crmLoading ? <Spinner size="sm" /> : t("Submit")}
+              </Button>
+            </Form>
+          )}
+        </div>
+      )}
+
       <h3 className="mb-3">{t("My Templates")}</h3>
       {loadingTpl ? (
         <Spinner />

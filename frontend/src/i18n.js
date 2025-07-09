@@ -106,6 +106,10 @@ const resources = {
       "Users unblocked": "Selected users unblocked",
       "Admin rights granted": "Admin rights granted",
       "Admin rights revoked": "Admin rights revoked",
+      "Send to Salesforce": "Send to Salesforce",
+      "Company Name": "Company Name",
+      Phone: "Phone",
+      "Data sent to Salesforce": "Data sent to Salesforce",
     },
   },
   ru: {
@@ -212,6 +216,10 @@ const resources = {
       "Users unblocked": "Пользователи разблокированы",
       "Admin rights granted": "Права администратора выданы",
       "Admin rights revoked": "Права администратора отозваны",
+      "Send to Salesforce": "Отправить в Salesforce",
+      "Company Name": "Название компании",
+      Phone: "Телефон",
+      "Data sent to Salesforce": "Данные отправлены в Salesforce",
     },
   },
 };
