@@ -2,7 +2,11 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const SF_AUTH_URL = process.env.SF_AUTH_URL || "https://login.salesforce.com";
+const loginBase =
+  process.env.SF_AUTH_URL ||
+  process.env.SF_LOGIN_URL ||
+  "https://login.salesforce.com";
+const SF_LOGIN_URL = loginBase.replace(/\/$/, "");
 const SF_API_VERSION = process.env.SF_API_VERSION || "v59.0";
 
 async function getToken() {
@@ -13,7 +17,10 @@ async function getToken() {
   params.append("username", process.env.SF_USERNAME || "");
   params.append("password", process.env.SF_PASSWORD || "");
 
-  const res = await fetch(`${SF_AUTH_URL}/services/oauth2/token`, {
+  const tokenEndpoint = SF_LOGIN_URL.includes("/services/oauth2/token")
+    ? SF_LOGIN_URL
+    : `${SF_LOGIN_URL}/services/oauth2/token`;
+  const res = await fetch(tokenEndpoint, {
     method: "POST",
     body: params,
   });
@@ -35,10 +42,12 @@ export const pushToSalesforce = async (req, res) => {
     "SF_CLIENT_SECRET",
     "SF_USERNAME",
     "SF_PASSWORD",
-    "SF_AUTH_URL",
     "SF_API_VERSION",
   ];
   const missingVars = requiredVars.filter((v) => !process.env[v]);
+  if (!process.env.SF_AUTH_URL && !process.env.SF_LOGIN_URL) {
+    missingVars.push("SF_AUTH_URL or SF_LOGIN_URL");
+  }
   if (missingVars.length) {
     return res.status(500).json({
       message: `Salesforce missing env: ${missingVars.join(",")}`,
@@ -71,7 +80,9 @@ export const pushToSalesforce = async (req, res) => {
     if (!accRes.ok) {
       const text = await accRes.text();
       console.error("Account error", text);
-      return res.status(500).json({ message: "Error creating Account" });
+      return res.status(500).json({
+        message: text || "Error creating Account",
+      });
     }
     const accData = await accRes.json();
 
@@ -95,9 +106,9 @@ export const pushToSalesforce = async (req, res) => {
     if (!ctRes.ok) {
       const text = await ctRes.text();
       console.error("Contact error", text);
-      return res
-        .status(500)
-        .json({ message: text || "Error creating Contact" });
+      return res.status(500).json({
+        message: text || "Error creating Contact",
+      });
     }
     const ctData = await ctRes.json();
 
