@@ -30,6 +30,20 @@ export const pushToSalesforce = async (req, res) => {
   if (req.user.id !== id && req.user.role !== "ADMIN") {
     return res.status(403).json({ message: "Access denied" });
   }
+  const requiredVars = [
+    "SF_CLIENT_ID",
+    "SF_CLIENT_SECRET",
+    "SF_USERNAME",
+    "SF_PASSWORD",
+    "SF_AUTH_URL",
+    "SF_API_VERSION",
+  ];
+  const missingVars = requiredVars.filter((v) => !process.env[v]);
+  if (missingVars.length) {
+    return res.status(500).json({
+      message: `Salesforce missing env: ${missingVars.join(",")}`,
+    });
+  }
   try {
     const { companyName, phone, title } = req.body;
     const user = await prisma.user.findUnique({
@@ -81,13 +95,17 @@ export const pushToSalesforce = async (req, res) => {
     if (!ctRes.ok) {
       const text = await ctRes.text();
       console.error("Contact error", text);
-      return res.status(500).json({ message: "Error creating Contact" });
+      return res
+        .status(500)
+        .json({ message: text || "Error creating Contact" });
     }
     const ctData = await ctRes.json();
 
     res.json({ accountId: accData.id, contactId: ctData.id });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Salesforce integration error" });
+    res
+      .status(500)
+      .json({ message: err.message || "Salesforce integration error" });
   }
 };
