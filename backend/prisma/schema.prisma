@@ -34,6 +34,7 @@ model User {
   password        String
   role            RoleType         @default(USER)
   isBlocked       Boolean          @default(false)
+  apiToken        String?          @unique
   createdAt       DateTime         @default(now())
   templates       Template[]
   templateAccess  TemplateAccess[]

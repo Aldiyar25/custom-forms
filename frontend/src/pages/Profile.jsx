@@ -31,6 +31,10 @@ function Profile() {
   const [crmSuccess, setCrmSuccess] = useState("");
   const [crmLoading, setCrmLoading] = useState(false);
 
+  const [apiToken, setApiToken] = useState("");
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const [tokenError, setTokenError] = useState("");
+
   useEffect(() => {
     if (!user) return;
     setLoadingTpl(true);
@@ -78,6 +82,20 @@ function Profile() {
       setCrmError(err.response?.data?.message || t("Error sending data"));
     } finally {
       setCrmLoading(false);
+    }
+  };
+
+  const handleGetToken = async () => {
+    if (!user) return;
+    setTokenError("");
+    setTokenLoading(true);
+    try {
+      const { data } = await api.get(`/users/${user.id}/api-token`);
+      setApiToken(data.apiToken);
+    } catch (err) {
+      setTokenError(err.response?.data?.message || "Error");
+    } finally {
+      setTokenLoading(false);
     }
   };
 
@@ -129,6 +147,23 @@ function Profile() {
           )}
         </div>
       )}
+
+      <div className="mb-4">
+        <Button size="sm" onClick={handleGetToken} className="me-2">
+          {t("Get API Token")}
+        </Button>
+        {tokenLoading && <Spinner size="sm" />}{" "}
+        {apiToken && (
+          <span className="ms-2">
+            {t("API Token")}: {apiToken}
+          </span>
+        )}
+        {tokenError && (
+          <Alert variant="danger" className="mt-2">
+            {tokenError}
+          </Alert>
+        )}
+      </div>
 
       <h3 className="mb-3">{t("My Templates")}</h3>
       {loadingTpl ? (

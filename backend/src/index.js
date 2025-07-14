@@ -11,6 +11,7 @@ import { isAdmin } from "./middlewares/auth.js";
 import adminRoutes from "./routes/admin.js";
 import formRoutes from "./routes/forms.js";
 import userRoutes from "./routes/users.js";
+import externalRoutes from "./routes/external.js";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use("/api/tags", tagRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/forms", formRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/external", externalRoutes);
 
 app.get("/api/protected", verifyToken, (req, res) => {
   res.json({

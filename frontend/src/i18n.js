@@ -110,6 +110,8 @@ const resources = {
       "Company Name": "Company Name",
       Phone: "Phone",
       "Data sent to Salesforce": "Data sent to Salesforce",
+      "API Token": "API Token",
+      "Get API Token": "Get API Token",
     },
   },
   ru: {
@@ -220,6 +222,8 @@ const resources = {
       "Company Name": "Название компании",
       Phone: "Телефон",
       "Data sent to Salesforce": "Данные отправлены в Salesforce",
+      "API Token": "API токен",
+      "Get API Token": "Получить API токен",
     },
   },
 };
