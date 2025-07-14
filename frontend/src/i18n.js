@@ -112,6 +112,7 @@ const resources = {
       "Data sent to Salesforce": "Data sent to Salesforce",
       "API Token": "API Token",
       "Get API Token": "Get API Token",
+      "Account already created": "Account already created",
     },
   },
   ru: {
@@ -224,6 +225,7 @@ const resources = {
       "Data sent to Salesforce": "Данные отправлены в Salesforce",
       "API Token": "API токен",
       "Get API Token": "Получить API токен",
+      "Account already created": "Аккаунт уже создан",
     },
   },
 };

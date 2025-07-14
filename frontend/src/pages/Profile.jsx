@@ -68,12 +68,12 @@ function Profile() {
     setCrmSuccess("");
     setCrmLoading(true);
     try {
-      await api.post(`/users/${user.id}/salesforce`, {
+      const { data } = await api.post(`/users/${user.id}/salesforce`, {
         companyName,
         phone,
         title: titleVal,
       });
-      setCrmSuccess(t("Data sent to Salesforce"));
+      setCrmSuccess(t(data?.message || "Data sent to Salesforce"));
       setCompanyName("");
       setPhone("");
       setTitleVal("");

@@ -80,6 +80,9 @@ export const pushToSalesforce = async (req, res) => {
     if (!accRes.ok) {
       const text = await accRes.text();
       console.error("Account error", text);
+      if (text.includes("DUPLICATES_DETECTED")) {
+        return res.json({ message: "Account already created" });
+      }
       return res.status(500).json({
         message: text || "Error creating Account",
       });
